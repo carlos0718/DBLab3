@@ -139,3 +139,15 @@ GROUP BY C.Nombre, C.FechaEstreno, N.Nombre ORDER BY Total DESC
 
 --30)Listado con nombre del curso y recaudación total. La recaudación total consiste en la sumatoria de costos de inscripción y de certificación. Listarlos ordenados de mayor a menor por recaudación.
  
+ /*MODELO PARCIAL*/
+
+ --1)Por cada año, la cantidad de cursos que se estrenaron en dicho año y el promedio de costo de cursada
+
+ --2)El idioma que se haya utilizada más veces como subtitulado Si hay varios idiomas en esa condición, mostrarlos a todos
+
+ --3)Apellidos y nombres de usuarios que cursaron algún curso y nunca fueron instructores de cursos
+
+ --4)Para cada usuario mostrar los apellidos y nombres y el costo más caro de un curso al que se haya inscripto. En caso de
+ --no haberse inscripto a ningun curso debe figurar igual pero con importe igual a -1
+
+ --5) La cantidad de usuarios que hayan realizado reseñas positivos(puntaje >=7) pero nunca una reseña negativa(puntaje<7)
