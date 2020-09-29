@@ -129,16 +129,59 @@ GROUP BY C.Nombre, C.FechaEstreno, N.Nombre ORDER BY Total DESC
 
 --25)Listado con Nombre del idioma del idioma más utilizado como subtítulo.
 
+SELECT TOP 1 I.Nombre, COUNT(IxC.IDTipoIdioma) TOTAL FROM Idiomas I JOIN Idioma_por_Cursos IxC ON I.ID = IxC.IDIdioma
+JOIN Tipos_Idiomas TI ON TI.ID = IxC.IDTipoIdioma WHERE TI.Nombre LIKE 'Subtitulo' GROUP BY I.Nombre ORDER BY 2 DESC
+
 --26)Listado con Nombre del curso y promedio de puntaje de reseñas apropiadas.
+SELECT * FROM Reseñas
+
+SELECT C.Nombre, AVG(R.Puntaje) [Prom Reseña Apropiada] FROM Curso C JOIN Inscripciones I ON I.IDCurso = c.ID
+JOIN Reseñas R ON R.IDInscripciones = I.ID WHERE R.Inapropiada = 0 GROUP BY C.Nombre
 
 --27)Listado con Nombre de usuario y la cantidad de reseñas inapropiadas que registró.
+--CJ
+SELECT U.NombreUsuario, COUNT(R.Inapropiada) Cantidad FROM Usuarios U LEFT JOIN Inscripciones I 
+ON U.ID = I.IDUsuario Left JOIN Reseñas R ON I.ID = R.IDInscripciones GROUP BY U.NombreUsuario
+ORDER BY U.NombreUsuario ASC
+--Angel
+Select U.nombreusuario, count(R.IDInscripciones) From Usuarios as U
+Left Join Inscripciones as I ON U.ID = I.IDUsuario
+Left Join Reseñas as R ON I.ID = R.IDInscripciones
+Where R.Inapropiada = 1 OR R.Inapropiada IS Null
+Group By U.NombreUsuario
+order by u.NombreUsuario asc
+--otra resolucion
+select u.NombreUsuario, sum(cast(r.inapropiada as int)) as 'Cantidad de reseñas inapropiadas'
+	from Usuarios as u left join Inscripciones as i on u.ID=i.IDUsuario
+	left join Reseñas as r on r.IDInscripciones=i.ID
+	group by u.NombreUsuario
+	order by u.NombreUsuario asc
 
---28)Listado con Nombre del curso, nombre y apellidos de usuarios y la cantidad de veces que dicho usuario realizó dicho curso. No mostrar cursos y usuarios que contabilicen cero.
+--28)Listado con Nombre del curso, nombre y apellidos de usuarios y la cantidad de veces que dicho usuario realizó dicho curso. 
+-- No mostrar cursos y usuarios que contabilicen cero.
 
---29)Listado con Apellidos y nombres, mail y duración total en concepto de clases de cursos a los que se haya inscripto. Sólo listar información de aquellos registros cuya duración total supere los 400 minutos.
+ SELECT C.Nombre, DP.Nombres, DP.Apellidos, COUNT(I.ID) FROM Curso C JOIN Inscripciones I ON C.ID = I.IDCurso 
+ JOIN Datos_Personales DP ON DP.ID = I.IDUsuario GROUP BY C.Nombre, DP.Nombres, DP.Apellidos
 
---30)Listado con nombre del curso y recaudación total. La recaudación total consiste en la sumatoria de costos de inscripción y de certificación. Listarlos ordenados de mayor a menor por recaudación.
- 
+--29)Listado con Apellidos y nombres, mail y duración total en concepto de clases de cursos a los que se haya inscripto. 
+--Sólo listar información de aquellos registros cuya duración total supere los 400 minutos.
+
+SELECT DP.Apellidos, DP.Nombres, DP.Email, SUM(Cl.Duracion) Tolal FROM Datos_Personales DP JOIN Inscripciones I
+ON DP.ID = I.IDUsuario JOIN Curso C ON C.ID = I.IDCurso JOIN Clase Cl ON Cl.IDCurso = C.ID 
+GROUP BY DP.Apellidos, DP.Nombres, DP.Email HAVING SUM(Cl.Duracion) > 400
+
+--30)Listado con nombre del curso y recaudación total. La recaudación total consiste en la sumatoria de costos de inscripción y de certificación.
+-- Listarlos ordenados de mayor a menor por recaudación.
+
+ /* PERO EL COSTO DENTRO DE LA TABLA DE CURSO? o DE LA TABLA DE INCRIPCION Y CERTIFICACION?*/
+
+ --A)Entiendo que sería este por el tema de la recaudación
+ SELECT C.Nombre, SUM(I.Costo+Ce.Costo) Recaudación  FROM Curso C JOIN Inscripciones I ON C.ID = I.IDCurso
+ JOIN Certificaciones Ce ON Ce.IDInscripciones = I.ID GROUP BY C.Nombre
+
+ --B)
+ SELECT C.Nombre, SUM(C.CostoCurso+C.CostoCertificacion) Recaudación  FROM Curso C GROUP BY C.Nombre
+
  /*MODELO PARCIAL*/
 
  --1)Por cada año, la cantidad de cursos que se estrenaron en dicho año y el promedio de costo de cursada
