@@ -155,11 +155,59 @@ WHERE Aux.CantM>Aux.CantF
 --13)Listado con nombre de país de aquellos que hayan registrado más usuarios de género masculino que de género femenino 
 --pero que haya registrado al menos un usuario de género femenino.
 
-
+SELECT * FROM
+(
+    SELECT P.Nombre,
+    (
+        SELECT COUNT(*) FROM Datos_Personales 
+        WHERE Genero = 'F' AND IDPais = P.ID
+    ) CantF,
+    (
+        SELECT COUNT(*) FROM Datos_Personales 
+        WHERE Genero = 'M' AND IDPais = P.ID
+    )CantM
+    FROM Pais P
+)Aux
+WHERE Aux.CantM>Aux.CantF AND Aux.CantF >= 1
 
 --14)Listado de cursos que hayan registrado la misma cantidad de idiomas de audio que de subtítulos.
 
+SELECT * FROM
+(
+    SELECT C.Nombre,
+    (
+        SELECT COUNT(*) FROM  Tipos_Idiomas TI JOIN Idioma_por_Cursos IxC 
+        ON IxC.IDTipoIdioma = TI.ID JOIN Idiomas I ON I.ID = IxC.IDIdioma
+        WHERE TI.Nombre = 'audio' AND C.ID = IxC.IDCurso
+    )[Total Audio],
+    (
+        SELECT COUNT(*) FROM  Tipos_Idiomas TI JOIN Idioma_por_Cursos IxC 
+        ON IxC.IDTipoIdioma = TI.ID JOIN Idiomas I ON I.ID = IxC.IDIdioma
+        WHERE TI.Nombre = 'subtitulo' AND C.ID = IxC.IDCurso
+    )[Total Subtitulo]
+FROM Curso C
+) Aux  
+WHERE Aux.[Total Audio] = Aux.[Total Subtitulo]
+
 --15)Listado de usuarios que hayan realizado más cursos en el año 2018 que en el 2019 y a su vez más cursos en el año 2019 que en el 2020.
+SELECT * FROM
+(
+    SELECT U.NombreUsuario,
+    (
+        SELECT COUNT(*) FROM Curso C JOIN Inscripciones I
+        ON C.ID = I.IDCurso WHERE YEAR(I.Fecha) = 2018 AND U.ID = I.IDUsuario
+    )[Total 2018],
+    (
+        SELECT COUNT(*) FROM Curso C JOIN Inscripciones I
+        ON C.ID = I.IDCurso WHERE YEAR(I.Fecha) = 2019 AND U.ID = I.IDUsuario
+    )[Total 2019],
+    (
+        SELECT COUNT(*) FROM Curso C JOIN Inscripciones I
+        ON C.ID = I.IDCurso WHERE YEAR(I.Fecha) = 2020 AND U.ID = I.IDUsuario
+    )[Total 2020]
+    FROM Usuarios U
+)Aux
+WHERE Aux.[Total 2018]>Aux.[Total 2019] AND Aux.[Total 2019]>Aux.[Total 2020]
 
 --16)Listado de apellido y nombres de usuarios que hayan realizado cursos pero nunca se hayan certificado.
 --Aclaración: Listado con apellidos y nombres de usuarios que hayan realizado al menos un curso y no se hayan certificado nunca.
