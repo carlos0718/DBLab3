@@ -186,11 +186,52 @@ GROUP BY DP.Apellidos, DP.Nombres, DP.Email HAVING SUM(Cl.Duracion) > 400
 
  --1)Por cada año, la cantidad de cursos que se estrenaron en dicho año y el promedio de costo de cursada
 
+ SELECT COUNT(YEAR(C.FechaEstreno)), AVG(C.CostoCurso) FROM Curso C
+ GROUP BY YEAR(C.FechaEstreno), C.CostoCurso--malll
+
+ Select Year(C.FechaEstreno), count(*) as Cantidad, Avg(C.CostoCurso) as PromedioCosto 
+From Curso As C
+Group By Year(C.FechaEstreno)
+Order by 1 desc
+
  --2)El idioma que se haya utilizada más veces como subtitulado Si hay varios idiomas en esa condición, mostrarlos a todos
+SELECT * FROM Tipos_Idiomas
+
+ SELECT TOP 1 WITH TIES I.Nombre,COUNT(*)subtitulados FROM Idiomas I JOIN Idioma_por_Cursos IxC
+ ON I.ID = IxC.IDIdioma JOIN Tipos_Idiomas TI ON IxC.IDTipoIdioma = TI.ID
+ WHERE TI.Nombre = 'subtitulo' GROUP BY I.Nombre ORDER BY COUNT(*) DESC
+
+Select TOP 1 WITH TIES I.Nombre, COUNT(*)--Top 1 With Ties I.Nombre
+From Idiomas as I
+Inner Join Idioma_por_Cursos as IxC ON I.ID = IxC.IDIdioma
+Inner Join Tipos_Idiomas as TP ON TP.ID = IxC.IDTipoIdioma
+Where TP.Nombre = 'subtitulo'
+Group By I.Nombre ORDER BY COUNT(*) DESC
 
  --3)Apellidos y nombres de usuarios que cursaron algún curso y nunca fueron instructores de cursos
+ 
+SELECT DISTINCT DP.Apellidos, DP.Nombres FROM Curso C LEFT JOIN Instructures_X_Curso IxC
+ON C.ID=IxC.IDCurso JOIN Datos_Personales DP ON IxC.IDUsuario = DP.ID --MAL
+ 
+Select DAT.Apellidos, DAT.Nombres from Datos_Personales as DAT
+Where DAT.ID IN 
+(
+    Select Distinct IDUsuario From Inscripciones
+) AND DAT.ID NOT IN (
+    Select Distinct IDUsuario From Instructures_X_Curso
+)
 
  --4)Para cada usuario mostrar los apellidos y nombres y el costo más caro de un curso al que se haya inscripto. En caso de
  --no haberse inscripto a ningun curso debe figurar igual pero con importe igual a -1
 
+ SELECT DP.Apellidos, DP.Nombres, ISNULL(MAX(I.Costo),-1) FROM Datos_Personales DP
+ left JOIN Inscripciones I ON DP.ID = I.IDUsuario GROUP BY DP.Apellidos, DP.Nombres
+
  --5) La cantidad de usuarios que hayan realizado reseñas positivos(puntaje >=7) pero nunca una reseña negativa(puntaje<7)
+
+ SELECT COUNT(*) FROM Usuarios U JOIN Inscripciones I ON I.IDUsuario = U.ID
+ JOIN Reseñas R ON R.IDInscripciones = I.ID
+ WHERE I.ID
+ ---------------------------
+
+ 

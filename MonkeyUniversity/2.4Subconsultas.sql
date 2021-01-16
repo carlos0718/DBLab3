@@ -211,3 +211,61 @@ WHERE Aux.[Total 2018]>Aux.[Total 2019] AND Aux.[Total 2019]>Aux.[Total 2020]
 
 --16)Listado de apellido y nombres de usuarios que hayan realizado cursos pero nunca se hayan certificado.
 --Aclaración: Listado con apellidos y nombres de usuarios que hayan realizado al menos un curso y no se hayan certificado nunca.
+
+
+
+
+/* PRIMER PARCIAL DB*/
+
+--1)Apellido y nombre de los pacientes y el costo de consulta más caro 
+--que haya abonado. Si algún paciente nunca abonó un costo de consulta, indicarlo con un valor -1.
+SELECT P.Apellido, P.Nombre, ISNULL(MAX(M.Costo_Consulta),-1) FROM Pacientes P 
+
+LEFT JOIN Turnos T ON T.IDPaciente = P.IDPaciente JOIN Medicos M 
+
+ON M.IDMedico = T.IDMedico GROUP BY P.Apellido, P.Nombre
+
+--2)Los apellidos y nombres de los pacientes que no se hayan atendido nunca con un médico de sexo masculino y de especialidad 'Psiquiatria'
+
+SELECT P.Apellido, P.Nombre FROM Pacientes P JOIN Turno T 
+
+ON T.IDPaciente = P.IDPaciente JOIN Medicos M ON M.IDMedico = T.IDMedico
+
+WHERE M.IDMedico NOT IN(
+     SELECT * FROM Medicos M  JOIN Especialidad E 
+     ON E.IDEspecialidad = M.IDEspecialidad 
+     WHERE M.SEXO = 'M' AND E.Nombre = 'Psiquiatria'
+)
+
+--3)Por cada especialidad, la cantidad de médicos/as que cobren más de $750 la consulta y la cantidad 
+--de médicos/as que cobren igual o menos de $750 la consulta
+
+SELECT E.Nombre,
+(
+     SELECT COUNT(*) FROM Medicos M
+     WHERE M.COSTO_CONSULTA > 750 AND E.IDEspecialidad = M.IDEspecialidad
+) MayorA750,
+(
+     SELECT COUNT(*) FROM Medicos M
+     WHERE M.COSTO_CONSULTA <= 750 AND E.IDEspecialidad = M.IDEspecialidad
+) MenorIgualA750
+FROM Especialidad E
+
+--4) La cantidad de pacientes que se hayan atendido más veces en el primer semestre 
+--que en el segundo semestre. Indistintamente del año.
+
+SELECT COUNT(*) FROM 
+(
+      SELECT P.Nombre ,
+      (
+           SELECT COUNT(*) FROM Turnos T 
+           WHERE MONTH(T.FechaHora) < 7 AND T.IDPaciente = P.IDPaciente
+      ) PrimerSem,
+       (
+           SELECT COUNT(*) FROM Turnos T 
+           WHERE MONTH(T.FechaHora) >= 7  AND T.IDPaciente = P.IDPaciente
+      )SegundpSem
+      FROM Pacientes P 
+
+) AUX
+WHERE AUX.PrimerSem>AUX.SegundpSem
